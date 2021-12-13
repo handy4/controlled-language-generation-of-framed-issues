@@ -10,7 +10,7 @@ To run this repository, you need to create three different Python environments.
 
 For all three environments, first install pytorch according to your system specifications following https://pytorch.org/get-started/locally/
 
-Then, for the first one, which is used for training and generation of CTRL and BART models and overall evaluation, use the requirements file in the root folder. For the second one, which uses adapter-transformers instead of base transformers, is used for training silver-corpus models and generating the silver samples itself. The corresponding requirements file can be found in [silver/]
+Then, for the first one, which is used for training and generation of CTRL and BART models and overall evaluation, use the requirements file in the root folder. For the second one, which uses adapter-transformers instead of base transformers, is used for training silver-corpus models and generating the silver samples itself. The corresponding requirements file can be found in [silver/](silver/)
 
 ```
 pip install -r requirements.txt
