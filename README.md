@@ -1,12 +1,16 @@
-# FUDGE: Controlled Text Generation With Future Discriminators
+# Controlled Language Generation of Framed Issues
 
-This repo contains code corresponding to the paper FUDGE: Controlled Text Generation With Future Discriminators (https://arxiv.org/abs/2104.05218) by Kevin Yang and Dan Klein, published at NAACL 2021. 
-
-You can also find a video presentation at http://somup.com/crhlVPFKN7 and the corresponding slides in `slides.pptx`. 
+This repo contains the code corresponding to my bachelor's thesis Controlled Language Generation of Framed Issues.
 
 ## Setup/Installation
 
-We tested on Python 3.8.5 but earlier versions of Python 3 are almost certainly fine. To get the required packages (other versions likely to work too):
+This code was tested on Python 3.6. However, newer versions should work too.
+
+To run this repository, you need to create three different Python environments.
+
+For all three environments, first install pytorch according to your system specifications following https://pytorch.org/get-started/locally/
+
+Then, for the first one, which is used for training and generation of CTRL and BART models and overall evaluation, use the requirements file in the root folder. For the second one, which uses adapter-transformers instead of base transformers, is used for training silver-corpus models and generating the silver samples itself. The corresponding requirements file can be found in /silver/
 
 ```
 pip install -r requirements.txt
