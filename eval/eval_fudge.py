@@ -11,8 +11,8 @@ import pickle
 from rouge import Rouge 
 rouge = Rouge()
 from statistics import mean
-#import nltk
-#nltk.download("wordnet")
+import nltk
+nltk.download("wordnet")
 from nltk.translate.meteor_score import meteor_score
 from bert_score import BERTScorer, score
 print("start")
