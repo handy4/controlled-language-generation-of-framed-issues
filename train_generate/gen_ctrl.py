@@ -4,10 +4,14 @@ import pandas as pd
 print("CUDA available?", torch.cuda.is_available())
 print("Num devices:", torch.cuda.device_count())
 
+GENERATION_PROMPTS = "data/data_sample.csv"
+MODEL_PATH = "models/ctrl_model"
+GENERATION_OUTPUT_PATH = "generations/ctrl_gens.csv"
+
 frames = ["none", "economic", "capacity", "morality", "fairness", "legality", "policy", "crime", "security", "health", "qol", "cultural", "public", "political", "external", "other"]
-df = pd.read_csv("data/test_ct.csv", sep="\t")
+df = pd.read_csv(GENERATION_PROMPTS, sep="\t")
 df['frame'] = df.apply(lambda x: frames[x["label"]], axis=1)
-model_path = "ctrl-frame_ct"
+model_path = MODEL_PATH
 
 from transformers import AutoTokenizer
 #tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
@@ -44,4 +48,4 @@ data_dict = {
     "generated": generated
 }
 generated_df = pd.DataFrame(data_dict)
-generated_df.to_csv("generations/CTRL_CT_fixed.csv", sep="\t", index = False)
+generated_df.to_csv(GENERATION_OUTPUT_PATH, sep="\t", index = False)

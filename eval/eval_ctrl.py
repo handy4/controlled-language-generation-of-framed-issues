@@ -10,8 +10,12 @@ from bert_score import BERTScorer, score
 print("start")
 scorer = BERTScorer(lang="en", rescale_with_baseline=True)
 
-test_data = pd.read_csv("data/test_ct.csv", sep = "\t")
-gen_data = pd.read_csv("data/CTRL_CT.csv", sep = "\t")
+GOLD_PATH = "data/input_gold_sample.csv"
+GEN_PATH = "data/input_gen_sample.csv"
+OUTPUT_PATH = "output/output_sample.csv"
+
+test_data = pd.read_csv("data/input_gold_sample.csv", sep = "\t")
+gen_data = pd.read_csv("data/input_gen_sample.csv", sep = "\t")
 
 gen_data["generated"] = gen_data["generated"].str.replace('^.*?\.\.?', '', regex=True)
 
@@ -69,7 +73,7 @@ for i in range(len(gen_data)):
             "meteor-max": mean(all_scores["meteor-max"]),
             "bert-max": mean(all_scores["bert-max"])
         }            
-        print("CTRL CT TEMP SCORES:", i)
+        print("CTRL TEMP SCORES:", i)
         print(temp_scores)
     
 final_scores = {

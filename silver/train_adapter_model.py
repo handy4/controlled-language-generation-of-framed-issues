@@ -1,5 +1,10 @@
  # If there's a GPU available...
 import torch
+
+TRAIN_DATA_PATH = "data/train_sample.csv"
+ADAPTER_SAVE_PATH = "model/frame_joint_final/"
+ADAPTER_NAME ="frame_joint"
+
 if torch.cuda.is_available():        # Tell PyTorch to use the GPU.    
     device = torch.device("cuda")    
     print('There are %d GPU(s) available.' % torch.cuda.device_count())    
@@ -12,7 +17,7 @@ else:
 import pandas as pd
 import sklearn
 
-df = pd.read_csv("data/frame_joint.csv", sep = "\t")
+df = pd.read_csv(TRAIN_DATA_PATH, sep = "\t")
 print('Number of training samples: {:,}\n'.format(df.shape[0]))
 df = df.drop(columns=["topic"])
 df = df.rename(columns={"sentence": "text"})
@@ -53,9 +58,9 @@ model = RobertaModelWithHeads.from_pretrained(
     config=config
 )
     
-model.add_adapter("frame_joint")
-model.add_classification_head("frame_joint", num_labels=16)
-model.train_adapter("frame_joint")
+model.add_adapter(ADAPTER_NAME)
+model.add_classification_head(ADAPTER_NAME, num_labels=16)
+model.train_adapter(ADAPTER_NAME)
 
 import numpy as np
 from transformers import TrainingArguments, Trainer, EvalPrediction
@@ -86,4 +91,4 @@ trainer = Trainer(
 
 trainer.train()
 
-model.save_adapter("model/frame_joint_final/", "frame_joint")
+MODEL_SAVE_PATH(ADAPTER_SAVE_PATH)

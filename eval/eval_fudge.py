@@ -1,11 +1,3 @@
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--generations_file", help="silver corpus size suffix",
-                    type=str)
-#parser.add_argument("--local_rank", type=int)                    
-args = parser.parse_args()
-generations_file = args.generations_file
-
 import pandas as pd
 import pickle
 from rouge import Rouge 
@@ -18,10 +10,12 @@ from bert_score import BERTScorer, score
 print("start")
 scorer = BERTScorer(lang="en", rescale_with_baseline=True)
 
-test_data = pd.read_csv("data/test_80_20.csv", sep = "\t")
-gen_data = pd.read_csv("data/" + generations_file, sep = "\t")
+GOLD_PATH = "data/input_gold_sample.csv"
+GEN_PATH = "data/input_gen_sample.csv"
+OUTPUT_PATH = "output/output_sample.csv"
 
-#gen_data["generated"] = gen_data["generated"].str.replace('^.*?\.\.?', '', regex=True)
+test_data = pd.read_csv("data/input_gold_sample.csv", sep = "\t")
+gen_data = pd.read_csv("data/input_gen_sample.csv", sep = "\t")
 
 all_scores =  {
     "rouge-l-avg": [],
@@ -77,10 +71,10 @@ for i in range(len(gen_data)):
             "meteor-max": mean(all_scores["meteor-max"]),
             "bert-max": mean(all_scores["bert-max"])
         }            
-        print("BART TEMP SCORES:", i)
+        print("FUDGE TEMP SCORES:", i)
         print(temp_scores)
         temp_df = pd.DataFrame(all_scores)
-        temp_df.to_csv("output/" + generations_file[:-4] + "_" + str(i) + ".csv", sep="\t", index = False)
+        temp_df.to_csv(OUTPUT_PATH, sep="\t", index = False)
     
 final_scores = {
     "rouge-l-avg": mean(all_scores["rouge-l-avg"]),
@@ -91,7 +85,7 @@ final_scores = {
 }
 
 final_df = pd.DataFrame(all_scores)
-final_df.to_csv("output/" + generations_file[:-4] + "_" + "final" + ".csv", sep="\t", index = False)
+final_df.to_csv(OUTPUT_PATH, sep="\t", index = False)
 
 with open("progress.txt", "a") as file_object:
     file_object.write(str(final_scores))
