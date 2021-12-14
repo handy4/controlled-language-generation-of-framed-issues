@@ -1,10 +1,3 @@
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--num_silver", help="silver corpus size suffix",
-                    type=int)             
-args = parser.parse_args()
-num_silver = args.num_silver
-
 import pandas as pd
 import pickle
 from rouge import Rouge 
@@ -17,10 +10,13 @@ from bert_score import BERTScorer, score
 print("start")
 scorer = BERTScorer(lang="en", rescale_with_baseline=True)
 
-test_data = pd.read_csv("data/test_80_20.csv", sep = "\t")
-gen_data = pd.read_csv("data/BART_seq2seq_80_20_" + str(num_silver) + ".csv", sep = "\t")
+GOLD_PATH = "data/input_gold_sample.csv"
+GEN_PATH = "data/input_gen_sample.csv"
+OUTPUT_PATH = "output/output_sample.csv"
 
-#gen_data["generated"] = gen_data["generated"].str.replace('^.*?\.\.?', '', regex=True)
+test_data = pd.read_csv("data/input_gold_sample.csv", sep = "\t")
+gen_data = pd.read_csv("data/input_gen_sample.csv", sep = "\t")
+
 
 all_scores =  {
     "rouge-l-avg": [],
@@ -78,7 +74,7 @@ for i in range(len(gen_data)):
         print("BART TEMP SCORES:", i)
         print(temp_scores)
         temp_df = pd.DataFrame(all_scores)
-        temp_df.to_csv("output/BART_seq2seq_80_20_" + str(num_silver) + "_" + str(i) + ".csv", sep="\t", index = False)
+        temp_df.to_csv(OUTPUT_PATH, sep="\t", index = False)
     
 final_scores = {
     "rouge-l-avg": mean(all_scores["rouge-l-avg"]),
@@ -89,7 +85,7 @@ final_scores = {
 }
 
 final_df = pd.DataFrame(all_scores)
-final_df.to_csv("output/BART_seq2seq_80_20_" + str(num_silver) + "_" + "final" + ".csv", sep="\t", index = False)
+final_df.to_csv(OUTPUT_PATH, sep="\t", index = False)
 
 
 with open("progress.txt", "a") as file_object:

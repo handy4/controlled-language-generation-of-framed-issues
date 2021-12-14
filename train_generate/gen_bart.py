@@ -1,21 +1,17 @@
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--num_silver", help="silver corpus size suffix",
-                    type=int)
-#parser.add_argument("--local_rank", type=int)                    
-args = parser.parse_args()
-num_silver = args.num_silver
-
 import torch
 import pandas as pd
+
+GENERATION_PROMPTS = "data/data_sample.csv"
+MODEL_PATH = "models/bart_model"
+GENERATION_OUTPUT_PATH = "generations/bart_gens.csv"
 
 print("CUDA available?", torch.cuda.is_available())
 print("Num devices:", torch.cuda.device_count())
 
 frames = ["none", "economic", "capacity", "morality", "fairness", "legality", "policy", "crime", "security", "health", "qol", "cultural", "public", "political", "external", "other"]
-df = pd.read_csv("data/test_80_20.csv", sep="\t")
+df = pd.read_csv(GENERATION_PROMPTS, sep="\t")
 df['frame'] = df.apply(lambda x: frames[x["label"]], axis=1)
-model_path = "models/BART_seq2seq_80_20_" + str(num_silver)
+model_path = MODEL_PATH
 
 from transformers import AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
@@ -47,4 +43,4 @@ data_dict = {
     "generated": generated
 }
 generated_df = pd.DataFrame(data_dict)
-generated_df.to_csv("generations/BART_seq2seq_80_20_" + str(num_silver) + ".csv", sep="\t", index = False)
+generated_df.to_csv(GENERATION_OUTPUT_PATH, sep="\t", index = False)
