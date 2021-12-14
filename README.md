@@ -6,99 +6,38 @@ This repo contains the code corresponding to my bachelor's thesis Controlled Lan
 
 This code was tested on Python 3.6. However, newer versions should work too.
 
-To run this repository, you need to create three different Python environments.
+To run the code in this repository, you need to create three different Python environments.
 
 For all three environments, first install pytorch according to your system specifications following https://pytorch.org/get-started/locally/
 
 Then, for the first one, which is used for training and generation of CTRL and BART models and overall evaluation, use the requirements file in the root folder. For the second one, which uses adapter-transformers instead of base transformers, is used for training silver-corpus models and generating the silver samples itself. The corresponding requirements file can be found in [silver/](silver/)
 
-```
-pip install -r requirements.txt
-```
+The implementation of FUDGE is based on the original code by Kevin Yang and Dan Klein. For setup instructions, please refer to https://github.com/yangkevin2/naacl-2021-fudge-controlled-generation
 
-Additionally, to get our pre-trained predictor checkpoints and training data, run:
+## Model Training and Evaluation
 
-```
-wget https://naacl2021-fudge-files.s3.amazonaws.com/large_files.zip
-```
+### Training
 
-and extract the zip to the top-level `lm-prediction/` folder. (There should be three folders, `ckpt/`, `train_data/`, and `topic_human_evals/`. The zip is 7GB.)
+To train the BART and CTRL models, in [train_generate/](train_generate/), run train_bart.py and train_ctrl.py respectively. Most arguments are currently still hard-coded into the files, so if you want to change file paths or model hyperparameters, please refer to the code.
 
-`ckpt/` contains predictor checkpoints for each task if you are just interested in running inference. (Note that for the paper results, we used predictors trained with an older version of the code, but the new checkpoints get similar results, so you are OK to use the new predictors provided here if e.g. you just want to use FUDGE as a baseline. You can just run the evaluation commands provided below; it should take maybe 5-60 minutes depending on the task and your compute, assuming you have a GPU.)
+To train FUDGE, please refer to the instructions at https://github.com/yangkevin2/naacl-2021-fudge-controlled-generation and use the newly added task names ftopic and fframe. To change the predictor architectures and forward logic, please change their respective code in main.py and model.py
 
-`train_data/` contains our GPT2-generated training data for the poetry and topic tasks' predictors. See https://github.com/raosudha89/GYAFC-corpus for instructions on gaining access to the GYAFC data used for the machine translation formality task; replace our dummy folders with the corresponding folders/files if you want to train our formality predictor. 
+You can find a sample input file in the data folder to understand the required input format.
 
-## Poetry Couplet Completion
+### Generation
 
-### Evaluation
+To generate issue-framed sentences for the issue and frame classes in your test data with the BART and CTRL models, in [train_generate/](train_generate/), run gen_bart.py and gen_ctrl.py respectively. To change file paths and generation strategy, you have to modify the code as well.
 
-To generate outputs, run:
-
-```
-python -u evaluate_poetry.py --iambic_ckpt ckpt/poetry/iambic_predictor/model.pth.tar --rhyme_ckpt ckpt/poetry/rhyme_predictor/model.pth.tar --newline_ckpt ckpt/poetry/newline_predictor/model.pth.tar --dataset_info ckpt/poetry/rhyme_predictor/dataset_info --rhyme_info ckpt/poetry/rhyme_predictor/rhyme_info --prefix_file poetry_data/couplet_prefixes.txt --precondition_topk 200 > poetry_preds.log
-```
-
-Then evaluate metrics using:
-
-```
-python eval_poetry_metrics.py --pred_file poetry_preds.log --prefix_file poetry_data/couplet_prefixes.txt
-```
-
-### Training your own predictors
-
-Example commands for all three predictors used in the poetry task below. (You actually probably don't need so many epochs for iambic and rhyme; in any case the commands will save intermediate ckpts so you can just stop them early if needed by inspecting the log.)
-
-Iambic predictor:
-
-```
-python -u main.py --task iambic --data_dir train_data/gpt2_generations --save_dir ckpt/poetry/iambic_retrain_predictor --num_workers 20 --batch_size 128 --epoch_max_len 100000 --validation_freq 10  --lr 2e-4 --epochs 1500 > iambic_retrain_predictor.log
-```
-
+To generate sentences with FUDGE, refer to the original repository for instructions and use the new script evaluate_frame.py .
 Rhyme predictor:
 
-```
-python -u main.py --task rhyme --data_dir train_data/gpt2_generations --save_dir ckpt/poetry/rhyme_retrain_predictor --num_workers 20 --batch_size 128 --epoch_max_len 100000 --validation_freq 10  --lr 2e-4 --epochs 1500 > rhyme_retrain_predictor.log
-```
-
-End of sentence predictor (referred to as "newline" in the code; 50 epochs is more than enough for this one):
-
-```
-python -u main.py --task newline --data_dir train_data/gpt2_generations --save_dir ckpt/poetry/newline_retrain_predictor --num_workers 20 --batch_size 128 --epoch_max_len 100000 --validation_freq 10  --lr 2e-4 --epochs 50 > newline_retrain_predictor.log
-```
-
-The same evaluation commands as before will work; just modify the paths in the command to point to `model_best.pth.tar`, `dataset_info`, and `rhyme_info` from your newly trained ckpt folders. 
-
-## Topic Control
-
 ### Evaluation
 
-To generate outputs, run:
+To evaluate the generated sentences against a gold sample (same ordering as input to generation script is important!) use the scripts eval_bart.py, eval_ctrl.py and eval_fudge.py in [eval/](eval/). Check the top of the files to set paths to input and gold samples.
 
-```
-python -u evaluate_topic.py --ckpt ckpt/topic/future_word_predictor/model.pth.tar --dataset_info ckpt/topic/future_word_predictor/dataset_info --prefix_file topic_data/topic_prefixes.txt --wordlist_dir topic_data/wordlists --condition_lambda 4.0 --verbose --precondition_topk 200 --topk 10 --sample_size 3 --max_sample_batch 1 --length_cutoff 80 --log_file topic_preds.log
-```
+## Silver Corpus Generation
 
-Then evaluate metrics using:
-
-```
-python eval_topic_metrics.py --log_file topic_preds.log --tw_dir topic_data/test_wordlists
-```
-
-You can also find our original generations and baselines in `topic_human_evals/`.
-
-### Training your own predictors
-
-Example command below.
-
-```
-python -u main.py --task topic --data_dir train_data/gpt2_generations --save_dir ckpt/topic/future_word_retrain_predictor --num_workers 20 --batch_size 128 --epoch_max_len 100000 --validation_freq 10  --lr 2e-4 --epochs 500 --glove_file train_data/glove.840B.300d.txt > future_word_retrain_predictor.log
-```
-
-The same evaluation commands as before will work; just modify the paths in the command to point to `model_best.pth.tar`, `dataset_info`, and `rhyme_info` from your newly trained ckpt folders. 
-
-## Machine Translation Formality
-
-### Evaluation
+### Train frame classifier
 
 To generate outputs, run:
 
