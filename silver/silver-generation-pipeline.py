@@ -18,6 +18,8 @@ tokenizer = load("tokenizers/punkt/{0}.pickle".format("english"))
 
 num_docs_accepted = 0
 
+ADAPTER_SAVE_PATH = "model/frame_joint_final/"
+
 keywords = {"abortion": ["abortion", "aborticide", "feticide", "foeticide", "embryoctony"],
            "death penalty": ["death penalty", "capital punishment", "death sentence", "death warrant", "judicial murder"], #"execution"
            "minimum wage": ["minimum wage", "living wage", "base pay", "nominal wages", "minimum income", "minimum standard of living", "subsistence level"],
@@ -137,7 +139,7 @@ model = RobertaModelWithHeads.from_pretrained(
     config=config,
 )
 
-adapter_name = model.load_adapter("model/frame_joint_final")
+adapter_name = model.load_adapter(ADAPTER_SAVE_PATH)
 model.set_active_adapters(adapter_name)
 
 import numpy as np
